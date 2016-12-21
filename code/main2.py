@@ -2,7 +2,7 @@
 
 import Preprocessing
 import Utils
-
+import TermFrequencyProcessing
 
 
 """
@@ -22,17 +22,15 @@ pos_path = "../sampledata/pos/"
 neg_path = "../sampledata/neg/"
 
 
-# get a new instance for preprocessing
+# get a new instance for processing
 # The new instance needs to know where positive and negative review directories are, also database no 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, Utils.DB_TWO)
-# extract positive and negative vocabularies
-prep.extract_vocab_DB_two()
-# print extracted vocabularies in dictionnary (json) format
-V = prep.get_v()
-#print(V)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, Utils.DB_TWO)
+tfp.compute_terms_frequency()
+#print(tfp.get_overall_terms_frequency())
+#print(tfp.get_reviews_info())
 
-# write the vocabs into 2 json files in order to save vocabs in a structured form
-prep.write_vocab()
+tfp.write_terms_frequency()
+tfp.write_reviews_info()
 
 
 #############################################################################################
@@ -43,11 +41,12 @@ prep.write_vocab()
 pos_path = "../sampledata/pos/"
 neg_path = "../sampledata/neg/"
 
-# get a new instance for preprocessing
+# get a new instance for processing
 # The new instance needs to know where positive and negative review directories are, also database no 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, Utils.DB_TWO)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, Utils.DB_TWO)
 
-prep.read_vocab()
-V = prep.get_v()
-print(V)
+tfp.read_terms_frequency()
+print(tfp.get_overall_terms_frequency())
+tfp.read_reviews_info()
+print(tfp.get_reviews_info())
 """
