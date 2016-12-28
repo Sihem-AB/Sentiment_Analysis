@@ -78,7 +78,7 @@ class Preprocessing(object):
 	{	 
 		"sentiment_class": 1, 		 ===============================> POSITIVE CLASS
 		"nb_word": 42, 
-		"docs": [
+		"reviews": [
 			{
 				"nb_sentence": 5, 
 				"nb_word": 21, 
@@ -107,11 +107,21 @@ class Preprocessing(object):
 		Read from the json files and get preprocessed vocabulary
 	"""
 	def read_vocab(self):	
-		with open(self.pos_path + "/" + self.pos_json_filename, 'r') as json_file:
+		pos_path = None
+		neg_path = None
+
+		if self.selected_DB == Utils.DB_ONE:
+			pos_path = Utils.get_parent_directory_for_file(self.pos_path)
+			neg_path = Utils.get_parent_directory_for_file(self.neg_path)
+		elif self.selected_DB == Utils.DB_TWO:
+			pos_path = self.pos_path
+			neg_path = self.neg_path
+
+		with open(pos_path + "/" + self.pos_json_filename, 'r') as json_file:
 			json_text = json_file.read()
 			pos_vocabs = json.loads(json_text)
 
-		with open(self.neg_path + "/" + self.neg_json_filename, 'r') as json_file:
+		with open(neg_path + "/" + self.neg_json_filename, 'r') as json_file:
 			json_text = json_file.read()
 			neg_vocabs = json.loads(json_text)
 
@@ -128,10 +138,20 @@ class Preprocessing(object):
 		Write into 2 json files in order to save vocabulary and not to do preprocessing each time
 	"""
 	def write_vocab(self):
-		with open(self.pos_path + "/" + self.pos_json_filename, 'w') as json_file:
+		pos_path = None
+		neg_path = None
+
+		if self.selected_DB == Utils.DB_ONE:
+			pos_path = Utils.get_parent_directory_for_file(self.pos_path)
+			neg_path = Utils.get_parent_directory_for_file(self.neg_path)
+		elif self.selected_DB == Utils.DB_TWO:
+			pos_path = self.pos_path
+			neg_path = self.neg_path
+
+		with open(pos_path + "/" + self.pos_json_filename, 'w') as json_file:
 			json.dump(self.V[Utils.POS], json_file)
 
-		with open(self.neg_path + "/" + self.neg_json_filename, 'w') as json_file:
+		with open(neg_path + "/" + self.neg_json_filename, 'w') as json_file:
 			json.dump(self.V[Utils.NEG], json_file)
 
 
@@ -151,7 +171,9 @@ class Preprocessing(object):
 	def extract_vocab_DB_one(self):
 		self._extract_vocab_DB_one(self.pos_path, Utils.POS)
 		self._extract_vocab_DB_one(self.neg_path, Utils.NEG)
-
+		V = self.get_v()
+		V["nb_word"] = V[Utils.POS]["nb_word"] + V[Utils.NEG]["nb_word"]
+		self.set_v(V)
 
 
 	def extract_vocab_DB_two(self):
@@ -163,14 +185,47 @@ class Preprocessing(object):
 
 
 
-	def _extract_vocab_DB_one(self):
-		pass # TODO
+	def _extract_vocab_DB_one(self, path, sent_class):
+		if not( Utils.is_file(path) ):
+			print("error: path is not an existing file")
+			# TODO raise an error
+			return 0
+
+
+		self.V[sent_class] = {}
+		self.V[sent_class]["nb_word"] = 0
+		self.V[sent_class]["sentiment_class"] = sent_class
+		self.V[sent_class]["reviews"] = []
+
+
+		with open("./" + path, "r") as f:
+			for sReview in f:
+				dReview = {}
+				dReview["nb_word"] = 0
+				dReview["nb_sentence"] = 0
+				dReview["rating"] = Utils.POS_RATING_DEFAULT if sent_class == Utils.POS else Utils.NEG_RATING_DEFAULT
+				dReview["sentences"] = []
+				
+				sReview = self.clean_html(sReview)
+				sentences = self.divide_into_sentences(sReview)
+				
+				for sentence in sentences:
+					aWords = self.sentence_preprocessing(sentence)
+					dWords, nb_word = self.find_term_frequency(aWords)
+					dReview["nb_word"] += nb_word
+					dReview["nb_sentence"] += 1 
+					dReview["sentences"].append(dWords)
+					self.V[sent_class]["nb_word"] += nb_word
+			
+				self.V[sent_class]["reviews"].append(dReview)
+
+
 
 
 
 	"""
-		1) Read each document in "pos" directory
-		2) extract sentences from each document
+		1) Read each review in "pos" directory
+		2) extract sentences from each review
 		3) apply preprocessing operations on each extracted sentence
 		4) find term frequency in each sentence
 		5) append structured data into relevant vocab data (pos or neg)
@@ -183,7 +238,7 @@ class Preprocessing(object):
 		"1" : {	 
 		"sentiment_class": 1, 		 ===============================> POSITIVE CLASS
 		"nb_word": 11, 
-		"docs": [
+		"reviews": [
 			{
 				"nb_sentence": 2, 
 				"nb_word": 7, 
@@ -203,7 +258,7 @@ class Preprocessing(object):
 		"0" : {	 
 		"sentiment_class": 0, 		 ===============================> NEGATIVE CLASS
 		"nb_word": 7, 
-		"docs": [
+		"reviews": [
 			{
 				"nb_sentence": 2, 
 				"nb_word": 5, 
@@ -232,34 +287,33 @@ class Preprocessing(object):
 		self.V[sent_class] = {}
 		self.V[sent_class]["nb_word"] = 0
 		self.V[sent_class]["sentiment_class"] = sent_class
-		self.V[sent_class]["docs"] = []
+		self.V[sent_class]["reviews"] = []
 
 		# get only .txt files and not .json files
 		files = [f for f in os.listdir(path) if re.match(r'.*\.txt', f)]
 
 		for filename in files:
-
 			rating = self.extract_rating(filename)
-			doc = {}
-			doc["nb_word"] = 0
-			doc["nb_sentence"] = 0
-			doc["rating"] = rating
-			doc["sentences"] = []
+			dReview = {}
+			dReview["nb_word"] = 0
+			dReview["nb_sentence"] = 0
+			dReview["rating"] = rating
+			dReview["sentences"] = []
 
 			with open (path+"/"+filename, "r") as f:
-				text = f.read()
-				text = self.clean_html(text)
-				sentences = self.divide_into_sentences(text)
+				sReview = f.read()
+				sReview = self.clean_html(sReview)
+				sentences = self.divide_into_sentences(sReview)
 				
 				for sentence in sentences:
 					aWords = self.sentence_preprocessing(sentence)
 					dWords, nb_word = self.find_term_frequency(aWords)
-					doc["nb_word"] += nb_word
-					doc["nb_sentence"] += 1 
-					doc["sentences"].append(dWords)
+					dReview["nb_word"] += nb_word
+					dReview["nb_sentence"] += 1 
+					dReview["sentences"].append(dWords)
 					self.V[sent_class]["nb_word"] += nb_word
 			
-			self.V[sent_class]["docs"].append(doc)
+			self.V[sent_class]["reviews"].append(dReview)
 
 
 

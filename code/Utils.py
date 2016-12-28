@@ -14,6 +14,8 @@ DB_TWO = 2
 POS = 1
 NEG = 0
 
+POS_RATING_DEFAULT = 7
+NEG_RATING_DEFAULT = 3
 
 ######################
 # Functions
@@ -26,6 +28,26 @@ def is_directory(path):
 	if not(os.path.isdir(path)) and not( os.path.isdir(os.path.join(os.getcwd(), path)) ):
 		return 0
 	return 1
+
+
+
+def is_file(path):
+	if not(os.path.isfile(path)) and not( os.path.isfile(os.path.join(os.getcwd(), path)) ):
+		return 0
+	return 1
+
+
+"""
+	return the parent directory the file specified by "path"
+	example: 
+		path: "/home/ls.txt"
+		output: "/home/"
+"""
+def get_parent_directory_for_file(path):
+	if is_file(path):
+		return "/".join(path.split("/")[:-1])
+	return path
+
 
 
 """

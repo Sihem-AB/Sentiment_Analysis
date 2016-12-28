@@ -14,19 +14,20 @@ import Utils
 """
 
 
+pos_path = "../sampledata/dataset1/pos/rt-polarity.pos"
+neg_path = "../sampledata/dataset1/neg/rt-polarity.neg"
+selected_DB = Utils.DB_ONE
+
 #############################################################################################
 # 1st use case: When necessary json files are not created yet
 #############################################################################################
 
-pos_path = "../sampledata/pos/"
-neg_path = "../sampledata/neg/"
-
 
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, Utils.DB_TWO)
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
 # extract positive and negative vocabularies
-prep.extract_vocab_DB_two()
+prep.extract_vocabulary()
 # print extracted vocabularies in dictionnary (json) format
 V = prep.get_v()
 #print(V)
@@ -40,12 +41,9 @@ prep.write_vocab()
 #############################################################################################
 
 """
-pos_path = "../sampledata/pos/"
-neg_path = "../sampledata/neg/"
-
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, Utils.DB_TWO)
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
 
 prep.read_vocab()
 V = prep.get_v()

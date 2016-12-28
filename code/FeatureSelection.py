@@ -28,12 +28,12 @@ class FeatureSelection(object):
 		Returns k% terms with largest values
 
 
-		Compute feature utility for DB_Two.
+		Compute feature utility.
         According to the source below, there are 3 feature utility function: mutual information, chi square test and frequency
         source: http://nlp.stanford.edu/IR-book/html/htmledition/feature-selection-1.html#fig:featselalg
         For now, there is only 1 available feature utility: Mutual Information (MI)
 	"""
-	def compute_feature_utility_DB_two(self, k=0.2):
+	def compute_feature_utility(self, k=0.2):
 		L = self.compute_MI(self.nb_neg_review, self.nb_pos_review)
 
 		if k > 1 or k <= 0:
@@ -41,7 +41,7 @@ class FeatureSelection(object):
 
 		# transform pourcentage into number
 		top_k = floor(k * (self.nb_word_in_neg_reviews + self.nb_word_in_pos_reviews)) # i.e floor(30.2) = 30
-		print("The number of terms with largest values according to the 'k' parameter ====>", top_k, "\n")
+		print("The number of terms with largest values according to the parameter 'k' ====>", top_k, "\n")
 		
 		# sort list by mutual information value in descending order
 		# extract top k terms

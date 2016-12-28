@@ -103,11 +103,21 @@ class TermFrequencyProcessing(object):
 	"""
 
 	def read_reviews_info(self):
-		with open(self.pos_path + "/" + self.pos_reviews_info_filename, 'r') as json_file:
+		pos_path = None
+		neg_path = None
+
+		if self.selected_DB == Utils.DB_ONE:
+			pos_path = Utils.get_parent_directory_for_file(self.pos_path)
+			neg_path = Utils.get_parent_directory_for_file(self.neg_path)
+		elif self.selected_DB == Utils.DB_TWO:
+			pos_path = self.pos_path
+			neg_path = self.neg_path		
+
+		with open(pos_path + "/" + self.pos_reviews_info_filename, 'r') as json_file:
 			json_text = json_file.read()
 			pos_reviews_info = json.loads(json_text)
 
-		with open(self.neg_path + "/" + self.neg_reviews_info_filename, 'r') as json_file:
+		with open(neg_path + "/" + self.neg_reviews_info_filename, 'r') as json_file:
 			json_text = json_file.read()
 			neg_reviews_info = json.loads(json_text)
 		
@@ -131,14 +141,25 @@ class TermFrequencyProcessing(object):
 
 
 	def write_reviews_info(self):	
-		with open(self.pos_path + "/" + self.pos_reviews_info_filename, 'w') as json_file:
+		pos_path = None
+		neg_path = None
+
+		if self.selected_DB == Utils.DB_ONE:
+			pos_path = Utils.get_parent_directory_for_file(self.pos_path)
+			neg_path = Utils.get_parent_directory_for_file(self.neg_path)
+		elif self.selected_DB == Utils.DB_TWO:
+			pos_path = self.pos_path
+			neg_path = self.neg_path		
+
+
+		with open(pos_path + "/" + self.pos_reviews_info_filename, 'w') as json_file:
 			pos_reviews_info = {}
 			pos_reviews_info["nb_review"] = self.nb_pos_review
 			# extract only terms frequency for positive reviews
 			pos_reviews_info["reviews_info"] = self.reviews_info[Utils.POS]
 			json.dump(pos_reviews_info, json_file)
 
-		with open(self.neg_path + "/" + self.neg_reviews_info_filename, 'w') as json_file:
+		with open(neg_path + "/" + self.neg_reviews_info_filename, 'w') as json_file:
 			neg_reviews_info = {}
 			neg_reviews_info["nb_review"] = self.nb_neg_review
 			# extract only terms frequency for negative reviews
@@ -198,11 +219,21 @@ class TermFrequencyProcessing(object):
 		Read from the json files and get preprocessed vocabulary
 	"""
 	def read_terms_frequency(self):	
-		with open(self.pos_path + "/" + self.pos_terms_json_filename, 'r') as json_file:
+		pos_path = None
+		neg_path = None
+
+		if self.selected_DB == Utils.DB_ONE:
+			pos_path = Utils.get_parent_directory_for_file(self.pos_path)
+			neg_path = Utils.get_parent_directory_for_file(self.neg_path)
+		elif self.selected_DB == Utils.DB_TWO:
+			pos_path = self.pos_path
+			neg_path = self.neg_path		
+
+		with open(pos_path + "/" + self.pos_terms_json_filename, 'r') as json_file:
 			json_text = json_file.read()
 			pos_terms = json.loads(json_text)
 
-		with open(self.neg_path + "/" + self.neg_terms_json_filename, 'r') as json_file:
+		with open(neg_path + "/" + self.neg_terms_json_filename, 'r') as json_file:
 			json_text = json_file.read()
 			neg_terms = json.loads(json_text)
 
@@ -230,12 +261,22 @@ class TermFrequencyProcessing(object):
 
 	"""
 	def write_terms_frequency(self):
-		with open(self.pos_path + "/" + self.pos_terms_json_filename, 'w') as json_file:
+		pos_path = None
+		neg_path = None
+
+		if self.selected_DB == Utils.DB_ONE:
+			pos_path = Utils.get_parent_directory_for_file(self.pos_path)
+			neg_path = Utils.get_parent_directory_for_file(self.neg_path)
+		elif self.selected_DB == Utils.DB_TWO:
+			pos_path = self.pos_path
+			neg_path = self.neg_path		
+
+		with open(pos_path + "/" + self.pos_terms_json_filename, 'w') as json_file:
 			# extract only terms frequency for positive reviews
 			pos_T = {key: val[Utils.POS] for key, val in self.T.items() if Utils.POS in val.keys()} 
 			json.dump(pos_T, json_file)
 
-		with open(self.neg_path + "/" + self.neg_terms_json_filename, 'w') as json_file:
+		with open(neg_path + "/" + self.neg_terms_json_filename, 'w') as json_file:
 			# extract only terms frequency for negative reviews
 			neg_T = {key: val[Utils.NEG] for key, val in self.T.items() if Utils.NEG in val.keys()}
 			json.dump(neg_T, json_file)
@@ -247,9 +288,9 @@ class TermFrequencyProcessing(object):
 #####################################################################################################
 
 	def compute_terms_frequency(self):
-		prep = Preprocessing.Preprocessing(self.pos_path, self.neg_path, Utils.DB_TWO)
+		prep = Preprocessing.Preprocessing(self.pos_path, self.neg_path, self.selected_DB)
 		# extract positive and negative vocabularies
-		prep.extract_vocab_DB_two()
+		prep.extract_vocabulary()
 		# print extracted vocabularies in dictionnary (json) format
 		V = prep.get_v()
 		#print(V)
@@ -265,8 +306,7 @@ class TermFrequencyProcessing(object):
 
 
 	def _compute_terms_frequency(self, vocabs, sentiment_class):
-		#reviews = vocabs["reviews"] use this line for compatibility with review/doc
-		reviews = vocabs["docs"]
+		reviews = vocabs["reviews"]
 
 		for review in reviews:
 			rating = review["rating"]
@@ -367,7 +407,7 @@ class TermFrequencyProcessing(object):
 	def update_overall_terms_frequency(self, review_terms, review_id, sentiment_class):
 		T = self.get_overall_terms_frequency()
 		
-		# review_terms contains all the word in a review (i.e. document for 2nd DB) whose its id is review_id
+		# review_terms contains all the word in a review  whose its id is review_id
 		for term, freq in review_terms.items():
 			if term not in T.keys():
 				T[term] = {}
@@ -395,8 +435,8 @@ class TermFrequencyProcessing(object):
 		The term frequency is associated with the terms.
 		It is possible that such a word, let's say "hello", is both in 1st sentence and 2nd sentence.
 		In this case, it needs to sum up the frequencies of the word "hello"
-		 to use term frequency in review/document level instead of sentence level.
-		This method computes the terms frequency in review/docuument level
+		 to use term frequency in review level instead of sentence level.
+		This method computes the terms frequency in review level
 
 
 		An example of output:

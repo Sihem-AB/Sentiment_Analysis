@@ -13,20 +13,19 @@ import FeatureSelection
 	This dataset is made up of 2 directories: pos/ and neg/. And each directory contains a number of review files
 """
 
+pos_path = "../sampledata/dataset2/pos/"
+neg_path = "../sampledata/dataset2/neg/"
+selected_DB = Utils.DB_TWO
 
 #############################################################################################
 # 1st use case: when necessary json files are not created yet
 #############################################################################################
 
 
-pos_path = "../sampledata/pos/"
-neg_path = "../sampledata/neg/"
-
-
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, Utils.DB_TWO)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
 
 tfp.compute_terms_frequency()
 #print(tfp.get_overall_terms_frequency())
@@ -41,11 +40,9 @@ nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
 
 
 
-fs = FeatureSelection.FeatureSelection(pos_path, neg_path, Utils.DB_TWO, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
 k = 0.2 # top k% terms
-print(fs.compute_feature_utility_DB_two(k))
-
-
+print(fs.compute_feature_utility(k))
 
 
 #############################################################################################
@@ -53,14 +50,10 @@ print(fs.compute_feature_utility_DB_two(k))
 #############################################################################################
 
 """
-pos_path = "../sampledata/pos/"
-neg_path = "../sampledata/neg/"
-
-
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, Utils.DB_TWO)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
 tfp.read_terms_frequency()
 T = tfp.get_overall_terms_frequency()
 tfp.read_reviews_info()
@@ -73,7 +66,7 @@ nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
 
 
 
-fs = FeatureSelection.FeatureSelection(pos_path, neg_path, Utils.DB_TWO, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
 k = 0.2 # top k% terms
-print(fs.compute_feature_utility_DB_two(k))
+print(fs.compute_feature_utility(k))
 """

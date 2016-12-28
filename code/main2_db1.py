@@ -13,18 +13,17 @@ import TermFrequencyProcessing
 	This dataset is made up of 2 directories: pos/ and neg/. And each directory contains a number of review files
 """
 
+pos_path = "../sampledata/dataset1/pos/rt-polarity.pos"
+neg_path = "../sampledata/dataset1/neg/rt-polarity.neg"
+selected_DB = Utils.DB_ONE
 
 #############################################################################################
 # 1st use case: When necessary json files are not created yet
 #############################################################################################
 
-pos_path = "../sampledata/pos/"
-neg_path = "../sampledata/neg/"
-
-
 # get a new instance for processing
 # The new instance needs to know where positive and negative review directories are, also database no 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, Utils.DB_TWO)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
 tfp.compute_terms_frequency()
 #print(tfp.get_overall_terms_frequency())
 #print(tfp.get_reviews_info())
@@ -38,12 +37,9 @@ tfp.write_reviews_info()
 #############################################################################################
 
 """
-pos_path = "../sampledata/pos/"
-neg_path = "../sampledata/neg/"
-
 # get a new instance for processing
 # The new instance needs to know where positive and negative review directories are, also database no 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, Utils.DB_TWO)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
 
 tfp.read_terms_frequency()
 print(tfp.get_overall_terms_frequency())
