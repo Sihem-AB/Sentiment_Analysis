@@ -5,10 +5,11 @@ import Utils
 import json
 
 class TermFrequencyProcessing(object):
-	def __init__(self, pos_path, neg_path, selected_DB):
+	def __init__(self, pos_path, neg_path, selected_DB, is_bigrams=False):
 		self.pos_path = pos_path 
 		self.neg_path = neg_path
 		self.selected_DB = selected_DB
+		self.is_bigrams = is_bigrams
 		self.T = {}   # overal term frequency
 		self.pos_terms_json_filename = "pos_terms_freq.json"
 		self.neg_terms_json_filename = "neg_terms_freq.json"
@@ -288,7 +289,7 @@ class TermFrequencyProcessing(object):
 #####################################################################################################
 
 	def compute_terms_frequency(self):
-		prep = Preprocessing.Preprocessing(self.pos_path, self.neg_path, self.selected_DB)
+		prep = Preprocessing.Preprocessing(self.pos_path, self.neg_path, self.selected_DB, self.is_bigrams)
 		# extract positive and negative vocabularies
 		prep.extract_vocabulary()
 		# print extracted vocabularies in dictionnary (json) format

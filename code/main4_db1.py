@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-import Preprocessing
 import Utils
 import TermFrequencyProcessing
+import FeatureSelection
 
 
 """
@@ -19,31 +19,55 @@ selected_DB = Utils.DB_ONE
 is_bigrams = False
 
 #############################################################################################
-# 1st use case: When necessary json files are not created yet
+# 1st use case: when necessary json files are not created yet
 #############################################################################################
 
-# get a new instance for processing
+
+# get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
+
 tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
+
 tfp.compute_terms_frequency()
 #print(tfp.get_overall_terms_frequency())
 #print(tfp.get_reviews_info())
+T = tfp.get_overall_terms_frequency()
+reviews_info = tfp.get_reviews_info()
 
-tfp.write_terms_frequency()
-tfp.write_reviews_info()
+nb_neg_review = tfp.get_nb_neg_review()
+nb_pos_review = tfp.get_nb_pos_review()
+nb_word_in_neg_reviews = tfp.get_nb_word_in_neg_reviews()
+nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
+
+
+
+fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+k = 0.2 # top k% terms
+print(fs.compute_TF_IDF(k))
 
 
 #############################################################################################
-# 2nd use case: When necessary json files are already created
+# 2nd use case: when necessary json files are already created
 #############################################################################################
 
 """
-# get a new instance for processing
+# get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
 
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
 tfp.read_terms_frequency()
-print(tfp.get_overall_terms_frequency())
+T = tfp.get_overall_terms_frequency()
 tfp.read_reviews_info()
-print(tfp.get_reviews_info())
+reviews_info = tfp.get_reviews_info()
+
+nb_neg_review = tfp.get_nb_neg_review()
+nb_pos_review = tfp.get_nb_pos_review()
+nb_word_in_neg_reviews = tfp.get_nb_word_in_neg_reviews()
+nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
+
+
+
+fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+k = 0.2 # top k% terms
+print(fs.compute_TF_IDF(k))
 """

@@ -16,6 +16,7 @@ import FeatureSelection
 pos_path = "../sampledata/dataset2/pos/"
 neg_path = "../sampledata/dataset2/neg/"
 selected_DB = Utils.DB_TWO
+is_bigrams = False
 
 #############################################################################################
 # 1st use case: when necessary json files are not created yet
@@ -25,7 +26,7 @@ selected_DB = Utils.DB_TWO
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
 
 tfp.compute_terms_frequency()
 #print(tfp.get_overall_terms_frequency())
@@ -42,7 +43,7 @@ nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
 
 fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
 k = 0.2 # top k% terms
-print(fs.compute_feature_utility(k))
+print(fs.compute_MI(k))
 
 
 #############################################################################################
@@ -53,7 +54,7 @@ print(fs.compute_feature_utility(k))
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
 tfp.read_terms_frequency()
 T = tfp.get_overall_terms_frequency()
 tfp.read_reviews_info()
@@ -68,5 +69,5 @@ nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
 
 fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
 k = 0.2 # top k% terms
-print(fs.compute_feature_utility(k))
+print(fs.compute_MI(k))
 """

@@ -24,13 +24,16 @@ from nltk.data import load
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import *
 from nltk.corpus import stopwords
+from nltk import bigrams
+
 
 
 class Preprocessing(object):
-	def __init__(self, pos_path, neg_path, selected_DB):
+	def __init__(self, pos_path, neg_path, selected_DB, is_bigrams=False):
 		self.pos_path = pos_path 
 		self.neg_path = neg_path
 		self.selected_DB = selected_DB
+		self.is_bigrams = is_bigrams
 		self.V = {}   # vocabs
 		self.STOPWORDS = stopwords.words('english')
 		self.pos_json_filename = "pos_vocab.json"
@@ -325,6 +328,9 @@ class Preprocessing(object):
 		aSentence = self.remove_stopwords(aSentence)
 		aSentence = self.apply_stemming(aSentence)
 
+		if self.is_bigrams:
+			aSentence = self.bigrams(aSentence)	
+
 		return aSentence
 
 
@@ -377,6 +383,15 @@ class Preprocessing(object):
 		# returns a list of word tokens and also remove multiple spaces and \t, \n etc.
 		return word_tokenize(sentence)
 
+
+
+	"""
+		input: ["I", "am", "happy"]
+		Output: ["I am", "am happy"]
+	"""
+	def bigrams(self, aWords):
+		bgs = bigrams(aWords) # nltk.bigrams returns a generator object
+		return [t[0]+" "+t[1] for t in bgs]
 
 
 
