@@ -14,8 +14,8 @@ DB_TWO = 2
 POS = 1
 NEG = 0
 
-POS_RATING_DEFAULT = 7
-NEG_RATING_DEFAULT = 3
+POS_RATING_DEFAULT = -1
+NEG_RATING_DEFAULT = -1
 
 ######################
 # Functions
@@ -47,6 +47,19 @@ def get_parent_directory_for_file(path):
 	if is_file(path):
 		return "/".join(path.split("/")[:-1])
 	return path
+
+
+
+"""
+	example:
+		input: l = [("a", 1), ("b", 3)]
+		output: {"a": 1, "b": 3}
+"""
+def make_dict_from_two_value_paired_list(l):
+	d = dict()
+	for item in l:
+		d[item[0]] = item[1]
+	return d
 
 
 

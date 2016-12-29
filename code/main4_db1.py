@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import Utils
+import Preprocessing
 import TermFrequencyProcessing
 import FeatureSelection
 
@@ -17,18 +18,26 @@ pos_path = "../sampledata/dataset1/pos/rt-polarity.pos"
 neg_path = "../sampledata/dataset1/neg/rt-polarity.neg"
 selected_DB = Utils.DB_ONE
 is_bigrams = False
+method = "MI"
+vector_type = "TF-IDF"
+# vector_type = "FREQ"
 
 #############################################################################################
 # 1st use case: when necessary json files are not created yet
 #############################################################################################
 
 
+oPrep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+# extract positive and negative vocabularies
+oPrep.extract_vocabulary()
+# print extracted vocabularies in dictionnary (json) format
+vocabs = oPrep.get_v()
+
+
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
-
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
-
-tfp.compute_terms_frequency()
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
+tfp.compute_terms_frequency(vocabs)
 #print(tfp.get_overall_terms_frequency())
 #print(tfp.get_reviews_info())
 T = tfp.get_overall_terms_frequency()
@@ -41,9 +50,13 @@ nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
 
 
 
-fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+fs = FeatureSelection.FeatureSelection(T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
 k = 0.2 # top k% terms
-print(fs.compute_TF_IDF(k))
+features_space = fs.build_features_space(k, method)
+reduced_vocabs = fs.reduce_vocabs(vocabs, features_space)
+
+bag_of_words_model = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type)
+print(bag_of_words_model)
 
 
 #############################################################################################
@@ -54,7 +67,13 @@ print(fs.compute_TF_IDF(k))
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
+oPrep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+# extract positive and negative vocabularies
+oPrep.extract_vocabulary()
+# print extracted vocabularies in dictionnary (json) format
+vocabs = oPrep.get_v()
+
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
 tfp.read_terms_frequency()
 T = tfp.get_overall_terms_frequency()
 tfp.read_reviews_info()
@@ -66,8 +85,11 @@ nb_word_in_neg_reviews = tfp.get_nb_word_in_neg_reviews()
 nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
 
 
-
-fs = FeatureSelection.FeatureSelection(pos_path, neg_path, selected_DB, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+fs = FeatureSelection.FeatureSelection(T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
 k = 0.2 # top k% terms
-print(fs.compute_TF_IDF(k))
+features_space = fs.build_features_space(k, method)
+reduced_vocabs = fs.reduce_vocabs(vocabs, features_space)
+
+bag_of_words_model = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type)
+print(bag_of_words_model)
 """

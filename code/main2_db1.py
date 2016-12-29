@@ -22,10 +22,16 @@ is_bigrams = False
 # 1st use case: When necessary json files are not created yet
 #############################################################################################
 
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+# extract positive and negative vocabularies
+prep.extract_vocabulary()
+# print extracted vocabularies in dictionnary (json) format
+vocabs = prep.get_v()
+
 # get a new instance for processing
 # The new instance needs to know where positive and negative review directories are, also database no 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
-tfp.compute_terms_frequency()
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
+tfp.compute_terms_frequency(vocabs)
 #print(tfp.get_overall_terms_frequency())
 #print(tfp.get_reviews_info())
 
@@ -40,7 +46,7 @@ tfp.write_reviews_info()
 """
 # get a new instance for processing
 # The new instance needs to know where positive and negative review directories are, also database no 
-tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB, is_bigrams)
+tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
 
 tfp.read_terms_frequency()
 print(tfp.get_overall_terms_frequency())

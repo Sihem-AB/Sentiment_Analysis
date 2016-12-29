@@ -44,7 +44,7 @@ prep.write_vocab()
 """
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
 
 prep.read_vocab()
 V = prep.get_v()

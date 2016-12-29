@@ -80,11 +80,12 @@ class Preprocessing(object):
 
 	{	 
 		"sentiment_class": 1, 		 ===============================> POSITIVE CLASS
-		"nb_word": 42, 
+		"nb_word": 69, 
 		"reviews": [
 			{
-				"nb_sentence": 5, 
-				"nb_word": 21, 
+				"rating": 7,
+				"nb_sentence": 3, 
+				"nb_word": 35, 
 				"sentences": [
 					{"first": 3, "care": 1, "human": 1, "love": 1, "taken": 1, "one": 1},
 					{"scene": 1, "cannaval": 1, "believ": 1, "steal": 1, "everi": 1, "bobbi": 1}, 
@@ -92,8 +93,9 @@ class Preprocessing(object):
 				]
 			},
 			{
-				"nb_sentence": 5, 
-				"nb_word": 21, 
+				"rating": 6,
+				"nb_sentence": 3, 
+				"nb_word": 34, 
 				"sentences": [
 					{"first": 3, "care": 1, "human": 1, "love": 1, "taken": 1, "one": 1},
 					{"scene": 1, "cannaval": 1, "believ": 1, "steal": 1, "everi": 1, "bobbi": 1}, 
@@ -213,8 +215,9 @@ class Preprocessing(object):
 				sentences = self.divide_into_sentences(sReview)
 				
 				for sentence in sentences:
+					nb_word = self.count_words(sentence)
 					aWords = self.sentence_preprocessing(sentence)
-					dWords, nb_word = self.find_term_frequency(aWords)
+					dWords= self.find_term_frequency(aWords)
 					dReview["nb_word"] += nb_word
 					dReview["nb_sentence"] += 1 
 					dReview["sentences"].append(dWords)
@@ -237,46 +240,52 @@ class Preprocessing(object):
 	An example of the whole vocabs (both positive and negative)
 	
 	{
-		"nb_word" : 18
+		"nb_word" : 46
 		"1" : {	 
-		"sentiment_class": 1, 		 ===============================> POSITIVE CLASS
-		"nb_word": 11, 
-		"reviews": [
-			{
-				"nb_sentence": 2, 
-				"nb_word": 7, 
-				"sentences": [
-					{"first": 3, "care": 1, ...},
-					{"scene": 1, "cannaval": 1, "believ": 1, ...}, 
-				]
-			},
-			{
-				"nb_sentence": 1, 
-				"nb_word": 4, 
-				"sentences": [
-					{"first": 3, "care": 1, ...}
-				]
-			}
+			"sentiment_class": 1, 		 ===============================> POSITIVE CLASS
+			"nb_word": 28, 
+			"reviews": [
+				{
+					"rating": 7,
+					"nb_sentence": 2, 
+					"nb_word": 19,		 ===============================> nb word before preprocessing 
+					"sentences": [
+						{"first": 3, "care": 1},
+						{"scene": 1, "cannaval": 1, "believ": 1}, 
+					]
+				},
+				{
+					"rating": 9,
+					"nb_sentence": 1, 
+					"nb_word": 9, 
+					"sentences": [
+						{"first": 3, "care": 1}
+					]
+				}
+			]
 		},
 		"0" : {	 
-		"sentiment_class": 0, 		 ===============================> NEGATIVE CLASS
-		"nb_word": 7, 
-		"reviews": [
-			{
-				"nb_sentence": 2, 
-				"nb_word": 5, 
-				"sentences": [
-					{"first": 1, "care": 1, ...},
-					{"scene": 1, "cannaval": 1, "believ": 1, ...}, 
-				]
-			},
-			{
-				"nb_sentence": 1, 
-				"nb_word": 2, 
-				"sentences": [
-					{"first": 1, "care": 1, ...}
-				]
-			}
+			"sentiment_class": 0, 		 ===============================> NEGATIVE CLASS
+			"nb_word": 18, 
+			"reviews": [
+				{
+					"rating": 3,
+					"nb_sentence": 2, 
+					"nb_word": 10, 
+					"sentences": [
+						{"first": 1, "care": 1},
+						{"scene": 1, "cannaval": 1, "believ": 1}, 
+					]
+				},
+				{
+					"rating": 2,
+					"nb_sentence": 1, 
+					"nb_word": 8, 
+					"sentences": [
+						{"first": 1, "care": 1}
+					]
+				}
+			]
 		}
 	}
 	"""	
@@ -309,8 +318,9 @@ class Preprocessing(object):
 				sentences = self.divide_into_sentences(sReview)
 				
 				for sentence in sentences:
+					nb_word = self.count_words(sentence)
 					aWords = self.sentence_preprocessing(sentence)
-					dWords, nb_word = self.find_term_frequency(aWords)
+					dWords = self.find_term_frequency(aWords)
 					dReview["nb_word"] += nb_word
 					dReview["nb_sentence"] += 1 
 					dReview["sentences"].append(dWords)
@@ -338,17 +348,19 @@ class Preprocessing(object):
 
 	def find_term_frequency(self, aWords):
 		dWords = {}
-		nb_term = 0
 		for word in aWords:
-			nb_term += 1
-
 			if word not in dWords:
 				dWords[word] = 1
 			else:
 				dWords[word] += 1
 
-		return dWords, nb_term
+		return dWords
 
+
+
+
+	def count_words(self, sentence):
+		return len(self.tokenize(sentence))
 
 
 
