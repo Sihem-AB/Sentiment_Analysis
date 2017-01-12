@@ -311,6 +311,8 @@ class Preprocessing(object):
 			dReview["nb_sentence"] = 0
 			dReview["rating"] = rating
 			dReview["sentences"] = []
+			dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
+			dReview["filename"] = filename
 
 			with open (path+"/"+filename, "r") as f:
 				sReview = f.read()
@@ -324,6 +326,7 @@ class Preprocessing(object):
 					dReview["nb_word"] += nb_word
 					dReview["nb_sentence"] += 1 
 					dReview["sentences"].append(dWords)
+					dReview["sentences_ordered"].append(aWords)
 					self.V[sent_class]["nb_word"] += nb_word
 			
 			self.V[sent_class]["reviews"].append(dReview)

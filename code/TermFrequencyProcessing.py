@@ -264,7 +264,6 @@ class TermFrequencyProcessing(object):
 
 	"""
 		Write into 2 json files in order to save vocabulary and not to do preprocessing each time
-
 	"""
 	def write_terms_frequency(self):
 		pos_path = None
@@ -306,8 +305,6 @@ class TermFrequencyProcessing(object):
 			self._compute_terms_frequency(vocabs, sentiment_class)
 
 
-
-
 	def _compute_terms_frequency(self, vocabs, sentiment_class):
 		reviews = vocabs["reviews"]
 
@@ -320,8 +317,6 @@ class TermFrequencyProcessing(object):
 
 			# update_overall_terms_frequency() updates self.T at each call
 			self.update_overall_terms_frequency(review_terms, review_id, sentiment_class)
-
-
 
 
 
@@ -427,6 +422,8 @@ class TermFrequencyProcessing(object):
 					}
 
 		self.set_overall_terms_frequency(T)
+
+
 
 
 

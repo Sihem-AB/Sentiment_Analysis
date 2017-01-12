@@ -2,9 +2,14 @@
 
 import Utils
 import TermFrequencyProcessing
+import operator
+import gensim
+
 from math import floor
 from math import log
 from copy import deepcopy
+from functools import reduce
+from DocIterator import DocIterator
 
 
 class FeatureSelection(object):
@@ -176,7 +181,7 @@ class FeatureSelection(object):
 	"""
 	def reduce_review(self, review, features_space):
 		sentences = review["sentences"]
-	
+
 		for sentence in sentences:
 			terms_to_be_removed = []
 			
@@ -184,9 +189,23 @@ class FeatureSelection(object):
 				if term not in features_space:
 					terms_to_be_removed.append(term)	
 			
-			for term in terms_to_be_removed:
-				del sentence[term]
-			
+		for term in terms_to_be_removed:
+			del sentence[term]
+
+		sentences_ordered = review["sentences_ordered"]
+		new_senteces_ordered = []
+
+		for sentence_ordered in sentences_ordered:
+
+			new_sentence = []
+			for word in sentence_ordered:
+				if word in features_space:
+					new_sentence.append(word)
+
+			new_senteces_ordered.append(new_sentence)
+
+		# Update
+		review["sentences_ordered"] = new_senteces_ordered
 
 
 ###############################################################################
@@ -279,4 +298,57 @@ class FeatureSelection(object):
 
 		return L
 
+
+###############################################################################
+# Doc2Vec model
+###############################################################################
+
+
+	# bag-of-words features haver two major weaknesses: they lose the ordering of the words and they also ignore semantics of the words.
+	# That's why we use Doc2Vec. We'll get a representation of the documents who take the order of the words into account
+
+	"""
+		Input:
+			vocabs: vocabulary object. It supposed to be a reduced vocabulary
+			size : size of the vectors who will represents the documents
+			nb_epoch : number of epoch doc2Vec will do in order to learn the vectors
+			learning_rate : wich rate we want to learn
+
+		Output:
+			return a list of vectors (docvecs structure). The length of each vector is the size size
+			You can access the vector using those ways :
+
+			docvec = docvecs[num_of_document]
+			docvec = docvecs[filename]
+	"""
+
+	def create_doc2vec_model(self, vocabs, size=300, nb_epochs=10, learning_rate=0.025):
+		model = {Utils.POS: [], Utils.NEG: []}
+
+		for sentiment_class in [Utils.NEG, Utils.POS]:
+			reviews = vocabs[sentiment_class]["reviews"]
+			docs = []
+			filenames = []
+			for review in reviews:
+				sentences = review["sentences_ordered"]
+
+				# We don't need to have the concept of sentences. We use reduce flat the list to only have the order.
+				docs.append(reduce(operator.add, sentences))
+				filenames.append(review["filename"])
+
+			# doc2vec need an iterator
+			it = DocIterator(docs, labels_list=filenames)
+
+			model = gensim.models.Doc2Vec(size=size, window=10, min_count=5, workers=11, alpha=learning_rate,
+										  min_alpha=0.025)  # use fixed learning rate
+
+			model.build_vocab(it)
+
+			for epoch in range(nb_epochs):
+				model.train(it)
+				model.alpha -= 0.002  # decrease the learning rate
+				model.min_alpha = model.alpha  # fix the learning rate, no deca
+				model.train(it)
+
+			return model.docvecs
 
