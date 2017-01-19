@@ -4,7 +4,7 @@ import Utils
 import Preprocessing
 import TermFrequencyProcessing
 import FeatureSelection
-
+import FileToReview
 
 """
  # DB_ONE: Sentence Polarity Dataset
@@ -28,12 +28,20 @@ vector_type = "TF-IDF"
 
 print("\n1st scenario\n\n")
 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+f2r = FileToReview.FileToReview(pos_path, neg_path, selected_DB)
+pos_reviews, neg_reviews = f2r.buildReviewMatrix()
+
+# get a new instance for preprocessing
+# The new instance needs to know where positive and negative review directories are, also database no 
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, pos_reviews, neg_reviews, is_bigrams)
+
 # extract positive and negative vocabularies
 prep.extract_vocabulary()
 # print extracted vocabularies in dictionnary (json) format
 vocabs = prep.get_v()
 
+# write the vocabs into 2 json files in order to save vocabs in a structured form
+prep.write_vocab()
 
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
@@ -66,9 +74,9 @@ print("\n2nd scenario\n\n")
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, None, None, is_bigrams)
 # extract positive and negative vocabularies
-prep.extract_vocabulary()
+prep.read_vocab()
 vocabs = prep.get_v()
 
 tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)

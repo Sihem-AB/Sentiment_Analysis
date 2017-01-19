@@ -2,7 +2,7 @@
 
 import Preprocessing
 import Utils
-
+import FileToReview
 
 
 """
@@ -17,6 +17,7 @@ import Utils
 pos_path = "../sampledata/dataset1/pos/rt-polarity.pos"
 neg_path = "../sampledata/dataset1/neg/rt-polarity.neg"
 selected_DB = Utils.DB_ONE
+is_bigrams = False
 
 #############################################################################################
 # 1st use case: When necessary json files are not created yet
@@ -24,9 +25,13 @@ selected_DB = Utils.DB_ONE
 
 print("\n1st scenario\n\n")
 
+
+f2r = FileToReview.FileToReview(pos_path, neg_path, selected_DB)
+pos_reviews, neg_reviews = f2r.buildReviewMatrix()
+
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, pos_reviews, neg_reviews, is_bigrams)
 # extract positive and negative vocabularies
 prep.extract_vocabulary()
 # print extracted vocabularies in dictionnary (json) format
@@ -45,7 +50,7 @@ print("\n2nd scenario\n\n")
 
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, None, None, is_bigrams)
 
 prep.read_vocab()
 V = prep.get_v()

@@ -14,8 +14,7 @@ DB_TWO = 2
 POS = 1
 NEG = -1
 
-POS_RATING_DEFAULT = -1
-NEG_RATING_DEFAULT = -1
+RATING_DEFAULT = -1
 
 ######################
 # Functions

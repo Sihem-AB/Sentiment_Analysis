@@ -5,6 +5,7 @@ import Preprocessing
 import TermFrequencyProcessing
 import FeatureSelection
 import pickle
+import FileToReview
 
 """
 Input :
@@ -21,35 +22,41 @@ Output :
     return feature_space : if mutual information is choosen, feature_space contain the words we keep (only if feature_space is not given as input)
 """
 def do_preprocessing(pos_path, neg_path, selected_DB, is_bigrams, k=None, method=None, features_space=None):
-    prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
-    # extract positive and negative vocabularies
-    prep.extract_vocabulary()
-    # print extracted vocabularies in dictionnary (json) format
-    vocabs = prep.get_v()
+	f2r = FileToReview.FileToReview(pos_path, neg_path, selected_DB)
+	pos_reviews, neg_reviews = f2r.buildReviewMatrix()
 
-    nb_neg_review = prep.get_nb_neg_review()
-    nb_pos_review = prep.get_nb_pos_review()
+	# get a new instance for preprocessing
+	# The new instance needs to know where positive and negative review directories are, also database no 
+	prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, pos_reviews, neg_reviews, is_bigrams)
+
+	# extract positive and negative vocabularies
+	prep.extract_vocabulary()
+	# print extracted vocabularies in dictionnary (json) format
+	vocabs = prep.get_v()
+
+	nb_neg_review = prep.get_nb_neg_review()
+	nb_pos_review = prep.get_nb_pos_review()
 
 
     # get a new instance
     # The new instance needs to know where positive and negative review directories are, also database no
-    tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
-    tfp.compute_terms_frequency(vocabs)
-    # print(tfp.get_overall_terms_frequency())
-    # print(tfp.get_reviews_info())
-    T = tfp.get_overall_terms_frequency()
+	tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
+	tfp.compute_terms_frequency(vocabs)
+	# print(tfp.get_overall_terms_frequency())
+	# print(tfp.get_reviews_info())
+	T = tfp.get_overall_terms_frequency()
 
 
-    fs = FeatureSelection.FeatureSelection(T, nb_neg_review, nb_pos_review)
+	fs = FeatureSelection.FeatureSelection(T, nb_neg_review, nb_pos_review)
 
-    if not features_space:
-        features_space = fs.build_features_space(k, method)
-        reduced_vocabs = fs.reduce_vocabs(vocabs, features_space)
+	if not features_space:
+		features_space = fs.build_features_space(k, method)
+		reduced_vocabs = fs.reduce_vocabs(vocabs, features_space)
 
-        return vocabs, reduced_vocabs, fs, features_space
+		return vocabs, reduced_vocabs, fs, features_space
 
-    reduced_vocabs = fs.reduce_vocabs(vocabs, features_space)
-    return vocabs, reduced_vocabs, fs
+	reduced_vocabs = fs.reduce_vocabs(vocabs, features_space)
+	return vocabs, reduced_vocabs, fs
 
 
 

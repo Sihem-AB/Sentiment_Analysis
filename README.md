@@ -6,7 +6,7 @@ run *code/main1_db2.py* for a test
 
 
 
-we mainly rely on a specific report project for this project: Alejandro Pelaez, Talal Ahmed, Mohsen Ghassemi. *Sentiment analysis of IMDb movie reviews*. 2015
+we mainly rely on a specific report project for this project: Alejandro Pelaez, Talal Ahmed, Mohsen Ghassemi. [*Sentiment analysis of IMDb movie reviews*. 2015](https://pdfs.semanticscholar.org/c521/80a8fe1acc99b4bf3cf3e11d3c8a38e2c7ff.pdf)
 
 
 

@@ -4,6 +4,7 @@ import Utils
 import Preprocessing
 import TermFrequencyProcessing
 import FeatureSelection
+import FileToReview
 
 
 """
@@ -27,7 +28,14 @@ method = "MI"
 
 print("\n1st scenario\n\n")
 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+
+f2r = FileToReview.FileToReview(pos_path, neg_path, selected_DB)
+pos_reviews, neg_reviews = f2r.buildReviewMatrix()
+
+# get a new instance for preprocessing
+# The new instance needs to know where positive and negative review directories are, also database no 
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, pos_reviews, neg_reviews, is_bigrams)
+
 # extract positive and negative vocabularies
 prep.extract_vocabulary()
 # print extracted vocabularies in dictionnary (json) format
@@ -61,7 +69,7 @@ print("\n2nd scenario\n\n")
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
 
-prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, None, None, is_bigrams)
 prep.read_vocab()
 
 nb_neg_review = prep.get_nb_neg_review()

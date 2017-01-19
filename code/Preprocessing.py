@@ -30,11 +30,14 @@ from nltk.sentiment.util import mark_negation
 
 
 class Preprocessing(object):
-	def __init__(self, pos_path, neg_path, selected_DB, is_bigrams=False):
+	def __init__(self, pos_path, neg_path, selected_DB, pos_reviews=None, neg_reviews=None, is_bigrams=False):
 		self.pos_path = pos_path 
 		self.neg_path = neg_path
+		self.pos_reviews = pos_reviews
+		self.neg_reviews = neg_reviews
 		self.selected_DB = selected_DB
 		self.is_bigrams = is_bigrams
+
 		self.V = {}   # vocabs
 		self.STOPWORDS = stopwords.words('english')
 		self.pos_json_filename = "pos_vocab.json"
@@ -57,6 +60,12 @@ class Preprocessing(object):
 	def get_neg_path(self):
 		return self.neg_path
 
+	def get_pos_reviews(self):
+		return self.pos_reviews
+
+	def get_neg_reviews(self):
+		return self.neg_reviews
+
 	def get_nb_pos_review(self):
 		return self.nb_pos_review
 
@@ -72,6 +81,12 @@ class Preprocessing(object):
 	
 	def set_neg_path(self, path):
 		self.neg_path = path
+
+	def set_pos_reviews(self, pos_reviews):
+		self.pos_reviews = pos_reviews
+
+	def set_neg_reviews(self, neg_reviews):
+		self.neg_reviews = neg_reviews
 
 	def set_nb_pos_review(self, nb_pos_review):
 		self.nb_pos_review = nb_pos_review
@@ -183,86 +198,23 @@ class Preprocessing(object):
 # Other Methods
 #############################################
 
+
 	def extract_vocabulary(self):
-		if self.selected_DB == Utils.DB_ONE:
-			self.extract_vocab_DB_one()
-		elif self.selected_DB == Utils.DB_TWO:
-			self.extract_vocab_DB_two()
-
-
-
-	def extract_vocab_DB_one(self):
-		self._extract_vocab_DB_one(self.pos_path, Utils.POS)
-		self._extract_vocab_DB_one(self.neg_path, Utils.NEG)
+		self._extract_vocabulary(self.pos_reviews, Utils.POS)
+		self._extract_vocabulary(self.neg_reviews, Utils.NEG)
 		V = self.get_v()
 		V["nb_word"] = V[Utils.POS]["nb_word"] + V[Utils.NEG]["nb_word"]
 		V["nb_review"] = V[Utils.POS]["nb_review"] + V[Utils.NEG]["nb_review"]
 		self.set_v(V)
 		self.set_nb_pos_review( V[Utils.POS]["nb_review"] )
 		self.set_nb_neg_review( V[Utils.NEG]["nb_review"] )
-
-
-	def extract_vocab_DB_two(self):
-		self._extract_vocab_DB_two(self.pos_path, Utils.POS)
-		self._extract_vocab_DB_two(self.neg_path, Utils.NEG)
-		V = self.get_v()
-		V["nb_word"] = V[Utils.POS]["nb_word"] + V[Utils.NEG]["nb_word"]
-		V["nb_review"] = V[Utils.POS]["nb_review"] + V[Utils.NEG]["nb_review"]
-		self.set_v(V)
-		self.set_nb_pos_review( V[Utils.POS]["nb_review"] )
 		self.set_nb_neg_review( V[Utils.NEG]["nb_review"] )
-
-
-
-	def _extract_vocab_DB_one(self, path, sent_class):
-		if not( Utils.is_file(path) ):
-			print("error: path is not an existing file")
-			# TODO raise an error
-			return 0
-
-
-		self.V[sent_class] = {}
-		self.V[sent_class]["nb_word"] = 0
-		self.V[sent_class]["nb_review"] = 0
-		self.V[sent_class]["sentiment_class"] = sent_class
-		self.V[sent_class]["reviews"] = []
-
-
-		with open("./" + path, "r") as f:
-			cpt = 0
-			for sReview in f:
-				cpt += 1
-				self.V[sent_class]["nb_review"] += 1
-
-				dReview = {}
-				dReview["nb_word"] = 0
-				dReview["nb_sentence"] = 0
-				dReview["rating"] = Utils.POS_RATING_DEFAULT if sent_class == Utils.POS else Utils.NEG_RATING_DEFAULT
-				dReview["sentences"] = []
-				dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
-				dReview["id"] = cpt * sent_class
-				
-				sReview = self.clean_html(sReview)
-				sentences = self.divide_into_sentences(sReview)
-				
-				for sentence in sentences:
-					nb_word = self.count_words(sentence)
-					aWords = self.sentence_preprocessing(sentence)
-					dWords= self.find_term_frequency(aWords)
-					dReview["nb_word"] += nb_word
-					dReview["nb_sentence"] += 1 
-					dReview["sentences"].append(dWords)
-					dReview["sentences_ordered"].append(aWords)
-					self.V[sent_class]["nb_word"] += nb_word
-			
-				self.V[sent_class]["reviews"].append(dReview)
-
 
 
 
 
 	"""
-		1) Read each review in "pos" directory
+		1) Extract each review from review matrix (i.e pos_reviews and neg_reviews)
 		2) extract sentences from each review
 		3) apply preprocessing operations on each extracted sentence
 		4) find term frequency in each sentence
@@ -321,55 +273,53 @@ class Preprocessing(object):
 		}
 	}
 	"""	
-	def _extract_vocab_DB_two(self, path, sent_class):
-		if not( Utils.is_directory(path) ):
-			print("error: path is not a directory")
-			# TODO raise an error
-			return 0
-
-
+	def _extract_vocabulary(self, aReviews, sent_class):
 		self.V[sent_class] = {}
 		self.V[sent_class]["nb_word"] = 0
 		self.V[sent_class]["nb_review"] = 0
 		self.V[sent_class]["sentiment_class"] = sent_class
 		self.V[sent_class]["reviews"] = []
 
-		# get only .txt files and not .json files
-		files = [f for f in os.listdir(path) if re.match(r'.*\.txt', f)]
 
+		"""
+		an example of aReviews:
+
+		array([['not bad :) ', '6'],
+                ['Loved it', '9'],
+                [' I can be pretty picky but loved it!', '9'],
+                ['Enjoy enjoy the show!', '7']], 
+                dtype='<U1')
+
+		"""
 		cpt = 0
-		for filename in files:
+		for sReview, rating in aReviews:
 			cpt += 1
-			rating = self.extract_rating(filename)
 			self.V[sent_class]["nb_review"] += 1
 
 			dReview = {}
 			dReview["nb_word"] = 0
 			dReview["nb_sentence"] = 0
-			dReview["rating"] = rating
+			dReview["rating"] = int(rating)
 			dReview["sentences"] = []
 			dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
-			dReview["filename"] = filename
 			dReview["id"] = cpt * sent_class
-
-			with open (path+"/"+filename, "r", encoding="utf8") as f:
-				sReview = f.read()
-				sReview = self.clean_html(sReview)
-				sentences = self.divide_into_sentences(sReview)
-				
-				for sentence in sentences:
-					nb_word = self.count_words(sentence)
-					aWords = self.sentence_preprocessing(sentence)
-					dWords = self.find_term_frequency(aWords)
-					dReview["nb_word"] += nb_word
-					dReview["nb_sentence"] += 1 
-					dReview["sentences"].append(dWords)
-					dReview["sentences_ordered"].append(aWords)
-					self.V[sent_class]["nb_word"] += nb_word
-
-			self.V[sent_class]["reviews"]
-
+		
+			sReview = self.clean_html(sReview)
+			sentences = self.divide_into_sentences(sReview)
+		
+			for sentence in sentences:
+				nb_word = self.count_words(sentence)
+				aWords = self.sentence_preprocessing(sentence)
+				dWords= self.find_term_frequency(aWords)
+				dReview["nb_word"] += nb_word
+				dReview["nb_sentence"] += 1 
+				dReview["sentences"].append(dWords)
+				dReview["sentences_ordered"].append(aWords)
+				self.V[sent_class]["nb_word"] += nb_word
+	
 			self.V[sent_class]["reviews"].append(dReview)
+
+
 
 
 
@@ -405,12 +355,6 @@ class Preprocessing(object):
 	def count_words(self, sentence):
 		return len(self.tokenize(sentence))
 
-
-
-	def extract_rating(self, filename):
-		# a rating value could be 10 so 2 digit
-		part = filename.split("_")[1]
-		return part.split(".")[0] # rating
 
 
 
