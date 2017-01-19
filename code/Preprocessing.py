@@ -229,8 +229,9 @@ class Preprocessing(object):
 
 
 		with open("./" + path, "r") as f:
-			cpt = 1
+			cpt = 0
 			for sReview in f:
+				cpt += 1
 				self.V[sent_class]["nb_review"] += 1
 
 				dReview = {}
@@ -240,7 +241,6 @@ class Preprocessing(object):
 				dReview["sentences"] = []
 				dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
 				dReview["id"] = cpt * sent_class
-				cpt += 1
 				
 				sReview = self.clean_html(sReview)
 				sentences = self.divide_into_sentences(sReview)
@@ -337,8 +337,9 @@ class Preprocessing(object):
 		# get only .txt files and not .json files
 		files = [f for f in os.listdir(path) if re.match(r'.*\.txt', f)]
 
-		cpt = -1
+		cpt = 0
 		for filename in files:
+			cpt += 1
 			rating = self.extract_rating(filename)
 			self.V[sent_class]["nb_review"] += 1
 
@@ -350,7 +351,6 @@ class Preprocessing(object):
 			dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
 			dReview["filename"] = filename
 			dReview["id"] = cpt * sent_class
-			cpt += 1
 
 			with open (path+"/"+filename, "r", encoding="utf8") as f:
 				sReview = f.read()
