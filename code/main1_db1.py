@@ -30,7 +30,7 @@ prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
 prep.extract_vocabulary()
 # print extracted vocabularies in dictionnary (json) format
 V = prep.get_v()
-#print(V)
+print(V)
 
 # write the vocabs into 2 json files in order to save vocabs in a structured form
 prep.write_vocab()

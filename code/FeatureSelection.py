@@ -4,6 +4,7 @@ import Utils
 import TermFrequencyProcessing
 import operator
 import gensim
+import numpy as np
 
 from math import floor
 from math import log
@@ -84,47 +85,57 @@ class FeatureSelection(object):
 		model[Utils.POS] = []
 		model[Utils.NEG] = []
 
+		nb_documents = len(vocabs[Utils.POS]["reviews"]) + len(vocabs[Utils.NEG]["reviews"])
+
+		X = np.zeros((nb_documents, len(features_space)))
+		Y = np.zeros(nb_documents)
 
 		# features_space is not efficient to find the index of the term
 		# features_space contains MI score for each term, and this is unnecessary for this task
 		# replace MI score by index value so that we can acces the index of each term
-		indexed_features_space = deepcopy(features_space)
+		# indexed_features_space = deepcopy(features_space)
+		indexed_features_space = {}
 		index = 0
-		for term, score in indexed_features_space.items():
+		for term, score in features_space.items():
+			# print("term : ", term)
 			indexed_features_space[term] = index
 			index += 1
 		nb_features = len(indexed_features_space)
 
-
 		for sentiment_class in [Utils.NEG, Utils.POS]:
 			reviews = vocabs[sentiment_class]["reviews"]
-
 			for review in reviews:
+				id = review["id"]
 				vec = self.create_review_vector(nb_features, indexed_features_space, review, vector_type)
-				model[sentiment_class].append(vec)
+				X[id, :] = vec
+				Y[id] = sentiment_class
+				# model[sentiment_class].append(vec)
 			
-		return model
+		return X, Y
 
 
 
 
 	def create_review_vector(self, nb_features, indexed_features_space, review, vector_type):
 		# create zeros vector
-		vec = [0] * nb_features
+		vec = np.zeros(nb_features)
 	
 		nb_word_in_review = review["nb_word"]
 		sentences = review["sentences"]
 		for sentence in sentences:
 			for term, freq in sentence.items():
-				index = indexed_features_space[term]
-				
-				if vector_type == "FREQ":
-					vec[index] = freq
-				elif vector_type == "TF-IDF":
-					vec[index] = self.compute_tf_idf(term, freq, nb_word_in_review)
-				else: # BINARY
-					vec[index] = 1
-		
+				try:
+					index = indexed_features_space[term]
+
+					if vector_type == "FREQ":
+						vec[index] = freq
+					elif vector_type == "TF-IDF":
+						vec[index] = self.compute_tf_idf(term, freq, nb_word_in_review)
+					else: # BINARY
+						vec[index] = 1
+				except KeyError:
+					pass
+
 		return vec
 
 
@@ -315,40 +326,53 @@ class FeatureSelection(object):
 			learning_rate : wich rate we want to learn
 
 		Output:
-			return a list of vectors (docvecs structure). The length of each vector is the size size
-			You can access the vector using those ways :
+			return X, Y
+			X : ndarray of size (nbdocuments, size)
+			Y : ndarray of size (nbdocuments)
 
-			docvec = docvecs[num_of_document]
-			docvec = docvecs[filename]
 	"""
 
 	def create_doc2vec_model(self, vocabs, size=300, nb_epochs=10, learning_rate=0.025):
-		model = {Utils.POS: [], Utils.NEG: []}
+		# model = {Utils.POS: [], Utils.NEG: []
 
+		nb_documents = len(vocabs[Utils.POS]["reviews"]) + len(vocabs[Utils.NEG]["reviews"])
+		X = np.zeros((nb_documents, size))
+		Y = np.zeros(nb_documents)
+
+		# We get all the documents and the ids of each document
 		for sentiment_class in [Utils.NEG, Utils.POS]:
 			reviews = vocabs[sentiment_class]["reviews"]
 			docs = []
-			filenames = []
+			ids = []
 			for review in reviews:
 				sentences = review["sentences_ordered"]
-
-				# We don't need to have the concept of sentences. We use reduce flat the list to only have the order.
+				# We don't need to have the concept of sentences. We use reduce to flat the list in order to only have the order.
 				docs.append(reduce(operator.add, sentences))
-				filenames.append(review["filename"])
+				ids.append(review["id"])
 
-			# doc2vec need an iterator
-			it = DocIterator(docs, labels_list=filenames)
+		# TRAINING DOC2VEC
+		# doc2vec need an iterator
+		it = DocIterator(docs, labels_list=ids)
+		model = gensim.models.Doc2Vec(size=size, window=10, min_count=1, workers=11, alpha=learning_rate,
+									  min_alpha=0.025)  # use fixed learning rate
+		model.build_vocab(it)
+		for epoch in range(nb_epochs):
+			model.train(it)
+			model.alpha -= 0.002  # decrease the learning rate
+			model.min_alpha = model.alpha  # fix the learning rate, no deca
+			model.train(it)
 
-			model = gensim.models.Doc2Vec(size=size, window=10, min_count=5, workers=11, alpha=learning_rate,
-										  min_alpha=0.025)  # use fixed learning rate
+		# We transform the model to have X and Y
+		for sentiment_class in [Utils.NEG, Utils.POS]:
+			reviews = vocabs[sentiment_class]["reviews"]
+			for review in reviews:
+				X[review["id"], :] = model.docvecs[review["id"]]
+				Y[review["id"]] = sentiment_class
+		return X, Y
 
-			model.build_vocab(it)
 
-			for epoch in range(nb_epochs):
-				model.train(it)
-				model.alpha -= 0.002  # decrease the learning rate
-				model.min_alpha = model.alpha  # fix the learning rate, no deca
-				model.train(it)
+	def create_doc2vec_tfidf_model(self, vocabs, reduced_vocabs, features_space, size=300, nb_epochs=10, learning_rate=0.025):
+		X_docvecs, Y = self.create_doc2vec_model(vocabs, size, nb_epochs, learning_rate)
+		Xtfidf, Y = self.create_bag_of_words_model(reduced_vocabs, features_space, "TF-IDF")
 
-			return model.docvecs
-
+		return np.concatenate((X_docvecs, Xtfidf), axis=1), Y

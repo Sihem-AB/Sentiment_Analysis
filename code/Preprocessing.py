@@ -204,12 +204,16 @@ class Preprocessing(object):
 
 
 		with open("./" + path, "r") as f:
+			cpt = 0
 			for sReview in f:
 				dReview = {}
 				dReview["nb_word"] = 0
 				dReview["nb_sentence"] = 0
 				dReview["rating"] = Utils.POS_RATING_DEFAULT if sent_class == Utils.POS else Utils.NEG_RATING_DEFAULT
 				dReview["sentences"] = []
+				dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
+				dReview["id"] = cpt * sent_class
+				cpt += 1
 				
 				sReview = self.clean_html(sReview)
 				sentences = self.divide_into_sentences(sReview)
@@ -221,6 +225,7 @@ class Preprocessing(object):
 					dReview["nb_word"] += nb_word
 					dReview["nb_sentence"] += 1 
 					dReview["sentences"].append(dWords)
+					dReview["sentences_ordered"].append(aWords)
 					self.V[sent_class]["nb_word"] += nb_word
 			
 				self.V[sent_class]["reviews"].append(dReview)
@@ -304,6 +309,7 @@ class Preprocessing(object):
 		# get only .txt files and not .json files
 		files = [f for f in os.listdir(path) if re.match(r'.*\.txt', f)]
 
+		cpt = 0
 		for filename in files:
 			rating = self.extract_rating(filename)
 			dReview = {}
@@ -313,8 +319,10 @@ class Preprocessing(object):
 			dReview["sentences"] = []
 			dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
 			dReview["filename"] = filename
+			dReview["id"] = cpt * sent_class
+			cpt += 1
 
-			with open (path+"/"+filename, "r") as f:
+			with open (path+"/"+filename, "r", encoding="utf8") as f:
 				sReview = f.read()
 				sReview = self.clean_html(sReview)
 				sentences = self.divide_into_sentences(sReview)
@@ -328,7 +336,9 @@ class Preprocessing(object):
 					dReview["sentences"].append(dWords)
 					dReview["sentences_ordered"].append(aWords)
 					self.V[sent_class]["nb_word"] += nb_word
-			
+
+			self.V[sent_class]["reviews"]
+
 			self.V[sent_class]["reviews"].append(dReview)
 
 
