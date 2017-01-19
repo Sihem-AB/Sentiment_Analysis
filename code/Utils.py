@@ -12,7 +12,7 @@ from math import log
 DB_ONE = 1
 DB_TWO = 2
 POS = 1
-NEG = 0
+NEG = -1
 
 POS_RATING_DEFAULT = -1
 NEG_RATING_DEFAULT = -1

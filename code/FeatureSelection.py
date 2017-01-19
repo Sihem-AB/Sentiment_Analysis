@@ -28,7 +28,7 @@ class FeatureSelection(object):
 
         {
                 "term1": {
-                        "0": {                  ==============> negative review (sentiment class)
+                        "-1": {                  ==============> negative review (sentiment class)
                                 "nb_review": nb,
                                 "reviews": [
                                         (review id, term frequency),
@@ -44,7 +44,7 @@ class FeatureSelection(object):
                         }
                 },
                 "term2": {
-                        "0": {
+                        "-1": {
                                 .
                                 .
                         },
@@ -74,6 +74,12 @@ class FeatureSelection(object):
 		corresponding word in the review and zero represents otherwise. 
 		Another option is also to use Tf-IDF value instead of binary value or frequency.
 		===> Se 7th section in the article
+
+		The goal of taking "features_space" in parameter is to take into account the order of features
+			in Mutual Information for review vectors. Thus, each review vector is created according to that order.
+			Example: features_space = ["hong", "kong", "monaco"], review1 = ["hong"], review2 = ["kong"].
+				review_vector1 = [1, 0, 0], review_vector2 = [0, 1, 0]
+
 
 		Input:
 			vocabs: vocabulary object. It supposed to be reduced vocabulary according to feature selection
@@ -204,19 +210,20 @@ class FeatureSelection(object):
 			del sentence[term]
 
 		sentences_ordered = review["sentences_ordered"]
-		new_senteces_ordered = []
+		new_sentences_ordered = []
 
 		for sentence_ordered in sentences_ordered:
 
 			new_sentence = []
 			for word in sentence_ordered:
-				if word in features_space:
+				if word not in terms_to_be_removed:
+				#if word in features_space:
 					new_sentence.append(word)
 
-			new_senteces_ordered.append(new_sentence)
+			new_sentences_ordered.append(new_sentence)
 
 		# Update
-		review["sentences_ordered"] = new_senteces_ordered
+		review["sentences_ordered"] = new_sentences_ordered
 
 
 ###############################################################################
@@ -254,7 +261,7 @@ class FeatureSelection(object):
 		
 		# sort list by mutual information value in descending order
 		# extract top k terms
-		k_repr_terms = sorted(FU, key=lambda x: x[1], reverse=True)[:top_k]
+		k_repr_terms = sorted(FU, key=lambda x: (x[1], x[0]), reverse=True)[:top_k]
 		#print(k_repr_terms)
 
 		# return a dict object whose key is a term and value is its MI score

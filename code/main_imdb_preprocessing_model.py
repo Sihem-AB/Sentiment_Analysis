@@ -64,8 +64,8 @@ def do_preprocessing(pos_path, neg_path, selected_DB, is_bigrams, k=None, method
 """
 
 # --------------------------Parameters --------------------------------------------------------------------------------
-rep_train = "../aclImdb/train"
-rep_test = "../aclImdb/test"
+rep_train = "../sampledata/dataset2/train"
+rep_test = "../sampledata/dataset2/test"
 
 pos_path_train = rep_train + "/pos/"
 neg_path_train = rep_train + "/neg/"
@@ -73,8 +73,6 @@ neg_path_train = rep_train + "/neg/"
 pos_path_test = rep_test + "/pos/"
 neg_path_test = rep_test + "/neg/"
 
-# pos_path = "../sampledata/dataset2/pos/"
-# neg_path = "../sampledata/dataset2/neg/"
 
 selected_DB = Utils.DB_TWO
 
@@ -97,10 +95,10 @@ X_train_doc2vec_tfidf, Y = fs.create_doc2vec_tfidf_model(vocabs, reduced_vocabs,
 X_train_tfidf = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type="TFIDF")
 
 # We save as a pickle
-# pickle.dump(X_train_doc2vec, open("../X_train_doc2vec.pickle", "wb"))
-# pickle.dump(X_train_doc2vec_tfidf, open("../X_train_doc2vec_tfidf"+str(k)+".pickle", "wb"))
-# pickle.dump(X_train_tfidf, open("../X_train_tfidf"+str(k)+".pickle", "wb"))
-# pickle.dump(Y, open("../Y_train.pickle", "wb"))
+pickle.dump(X_train_doc2vec, open("../X_train_doc2vec.pickle", "wb"))
+pickle.dump(X_train_doc2vec_tfidf, open("../X_train_doc2vec_tfidf"+str(k)+".pickle", "wb"))
+pickle.dump(X_train_tfidf, open("../X_train_tfidf"+str(k)+".pickle", "wb"))
+pickle.dump(Y, open("../Y_train.pickle", "wb"))
 pickle.dump(features_space, open("../featurespace"+str(k)+".pickle", "wb"))
 
 

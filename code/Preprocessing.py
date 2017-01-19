@@ -25,6 +25,7 @@ from nltk.tokenize import word_tokenize
 from nltk.stem.porter import *
 from nltk.corpus import stopwords
 from nltk import bigrams
+from nltk.sentiment.util import mark_negation
 
 
 
@@ -269,8 +270,8 @@ class Preprocessing(object):
 				}
 			]
 		},
-		"0" : {	 
-			"sentiment_class": 0, 		 ===============================> NEGATIVE CLASS
+		"-1" : {	 
+			"sentiment_class": -1, 		 ===============================> NEGATIVE CLASS
 			"nb_word": 18, 
 			"reviews": [
 				{
@@ -346,7 +347,7 @@ class Preprocessing(object):
 	def sentence_preprocessing(self, sentence):
 		sentence = self.lowercase(sentence)
 		aSentence = self.tokenize(sentence)
-		#aSentence = self.handle_negation(aSentence) # TODO
+		aSentence = self.handle_negation(aSentence)
 		aSentence = self.remove_punctuation(aSentence)
 		aSentence = self.remove_stopwords(aSentence)
 		aSentence = self.apply_stemming(aSentence)
@@ -386,7 +387,8 @@ class Preprocessing(object):
 
 
 	def handle_negation(self, aWords):
-		pass # TODO
+		# http://www.nltk.org/_modules/nltk/sentiment/util.html#mark_negation
+		return mark_negation(aWords)
 
 
 

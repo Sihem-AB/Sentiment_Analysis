@@ -95,7 +95,7 @@ class TermFrequencyProcessing(object):
 	An example of self.reviews_info:
 
 	{
-		0 : [			===============> negative reviews
+		-1 : [			===============> negative reviews
 			(3, 42),			===============> first element is review id, 2nd is nb word
 			(2, 85),
 			(4, 40)
@@ -190,7 +190,7 @@ class TermFrequencyProcessing(object):
 		overall_terms_frequency will be:
 		{
 			"soon": {
-				0: {				===============> negative review
+				-1: {				===============> negative review
 					"nb_review": 1,
 					"reviews": [
 						[3, 1]			===========> the word "soon" is in 1 negative review whose the id is 3 and the term frequency is 1
@@ -205,7 +205,7 @@ class TermFrequencyProcessing(object):
 				}
 			},
 			"predecessor": {
-				0: {
+				-1: {
 					"nb_review": 1,
 					"reviews": [
 						[2, 3]
@@ -328,7 +328,7 @@ class TermFrequencyProcessing(object):
 	An example:
 	
 	{
-		0 : [
+		-1 : [
 			(3, 42),
 			(2, 85),
 			(4, 40)
@@ -375,7 +375,7 @@ class TermFrequencyProcessing(object):
 
 	{
 		"term1": {
-			"0": {			==============> negative review (sentiment class)
+			"-1": {			==============> negative review (sentiment class)
 				"nb_review": nb,
 				"reviews": [
 					(review id, term frequency),
@@ -391,7 +391,7 @@ class TermFrequencyProcessing(object):
 			}
 		},
 		"term2": {
-			"0": {
+			"-1": {
 				.
 				.
 			},

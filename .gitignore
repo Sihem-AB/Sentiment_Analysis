@@ -3,10 +3,8 @@
 # config
 ############################################
 
-/sampledata/dataset1/pos/*.json
-/sampledata/dataset1/neg/*.json
-/sampledata/dataset2/pos/*.json
-/sampledata/dataset2/neg/*.json
+*.json
+*.pickle
 
 ############################################
 # From python template
