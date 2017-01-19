@@ -14,13 +14,10 @@ from DocIterator import DocIterator
 
 
 class FeatureSelection(object):
-	def __init__(self, T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews):
+	def __init__(self, T, nb_neg_review, nb_pos_review):
 		self.T = T   # overall terms frequency
-		self.reviews_info = reviews_info
 		self.nb_neg_review = nb_neg_review
 		self.nb_pos_review = nb_pos_review
-		self.nb_word_in_neg_reviews = nb_word_in_neg_reviews
-		self.nb_word_in_pos_reviews = nb_word_in_pos_reviews
 
 
 	"""

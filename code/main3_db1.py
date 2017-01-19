@@ -25,6 +25,8 @@ method = "MI"
 # 1st use case: when necessary json files are not created yet
 #############################################################################################
 
+print("\n1st scenario\n\n")
+
 prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
 # extract positive and negative vocabularies
 prep.extract_vocabulary()
@@ -39,16 +41,11 @@ tfp.compute_terms_frequency(vocabs)
 #print(tfp.get_overall_terms_frequency())
 #print(tfp.get_reviews_info())
 T = tfp.get_overall_terms_frequency()
-reviews_info = tfp.get_reviews_info()
 
-nb_neg_review = tfp.get_nb_neg_review()
-nb_pos_review = tfp.get_nb_pos_review()
-nb_word_in_neg_reviews = tfp.get_nb_word_in_neg_reviews()
-nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
+nb_neg_review = prep.get_nb_neg_review()
+nb_pos_review = prep.get_nb_pos_review()
 
-
-
-fs = FeatureSelection.FeatureSelection(T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+fs = FeatureSelection.FeatureSelection(T, nb_neg_review, nb_pos_review)
 k = 0.2 # top k% terms
 print(fs.build_features_space(k, method))
 
@@ -57,24 +54,24 @@ print(fs.build_features_space(k, method))
 # 2nd use case: when necessary json files are already created
 #############################################################################################
 
-"""
+print("\n2nd scenario\n\n")
+
 # get a new instance
 # The new instance needs to know where positive and negative review directories are, also database no 
+
+prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
+prep.read_vocab()
+
+nb_neg_review = prep.get_nb_neg_review()
+nb_pos_review = prep.get_nb_pos_review()
+
 
 tfp = TermFrequencyProcessing.TermFrequencyProcessing(pos_path, neg_path, selected_DB)
 tfp.read_terms_frequency()
 T = tfp.get_overall_terms_frequency()
-tfp.read_reviews_info()
-reviews_info = tfp.get_reviews_info()
-
-nb_neg_review = tfp.get_nb_neg_review()
-nb_pos_review = tfp.get_nb_pos_review()
-nb_word_in_neg_reviews = tfp.get_nb_word_in_neg_reviews()
-nb_word_in_pos_reviews = tfp.get_nb_word_in_pos_reviews()
 
 
 
-fs = FeatureSelection.FeatureSelection(T, reviews_info, nb_neg_review, nb_pos_review, nb_word_in_neg_reviews, nb_word_in_pos_reviews)
+fs = FeatureSelection.FeatureSelection(T, nb_neg_review, nb_pos_review)
 k = 0.2 # top k% terms
-print(fs.build_feature_spaces(k, method))
-"""
+print(fs.build_features_space(k, method))

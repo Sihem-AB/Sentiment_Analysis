@@ -40,6 +40,9 @@ class Preprocessing(object):
 		self.pos_json_filename = "pos_vocab.json"
 		self.neg_json_filename = "neg_vocab.json"
 
+		self.nb_pos_review = None
+		self.nb_neg_review = None
+
 
 #############################################
 # Getter/Setter
@@ -48,26 +51,33 @@ class Preprocessing(object):
 	def get_v(self):
 		return self.V
 
-
 	def get_pos_path(self):
 		return self.pos_path
 
-	
 	def get_neg_path(self):
 		return self.neg_path
+
+	def get_nb_pos_review(self):
+		return self.nb_pos_review
+
+	def get_nb_neg_review(self):
+		return self.nb_neg_review
 
 	
 	def set_v(self, V):
 		self.V = V
 
-
 	def set_pos_path(self, path):
 		self.pos_path = path
-
 	
-	def get_neg_path(self, path):
+	def set_neg_path(self, path):
 		self.neg_path = path
 
+	def set_nb_pos_review(self, nb_pos_review):
+		self.nb_pos_review = nb_pos_review
+
+	def set_nb_neg_review(self, nb_neg_review):
+		self.nb_neg_review = nb_neg_review
 
 
 
@@ -135,7 +145,14 @@ class Preprocessing(object):
 		V[Utils.POS] = pos_vocabs
 		V[Utils.NEG] = neg_vocabs
 		V["nb_word"] = pos_vocabs["nb_word"] + neg_vocabs["nb_word"]
+		V["nb_review"] = pos_vocabs["nb_review"] + neg_vocabs["nb_review"]
 		self.set_v(V)
+		self.set_nb_pos_review( pos_vocabs["nb_review"] )
+		self.set_nb_neg_review( neg_vocabs["nb_review"] )
+
+
+
+
 
 
 
@@ -179,7 +196,10 @@ class Preprocessing(object):
 		self._extract_vocab_DB_one(self.neg_path, Utils.NEG)
 		V = self.get_v()
 		V["nb_word"] = V[Utils.POS]["nb_word"] + V[Utils.NEG]["nb_word"]
+		V["nb_review"] = V[Utils.POS]["nb_review"] + V[Utils.NEG]["nb_review"]
 		self.set_v(V)
+		self.set_nb_pos_review( V[Utils.POS]["nb_review"] )
+		self.set_nb_neg_review( V[Utils.NEG]["nb_review"] )
 
 
 	def extract_vocab_DB_two(self):
@@ -187,7 +207,10 @@ class Preprocessing(object):
 		self._extract_vocab_DB_two(self.neg_path, Utils.NEG)
 		V = self.get_v()
 		V["nb_word"] = V[Utils.POS]["nb_word"] + V[Utils.NEG]["nb_word"]
+		V["nb_review"] = V[Utils.POS]["nb_review"] + V[Utils.NEG]["nb_review"]
 		self.set_v(V)
+		self.set_nb_pos_review( V[Utils.POS]["nb_review"] )
+		self.set_nb_neg_review( V[Utils.NEG]["nb_review"] )
 
 
 
@@ -200,13 +223,16 @@ class Preprocessing(object):
 
 		self.V[sent_class] = {}
 		self.V[sent_class]["nb_word"] = 0
+		self.V[sent_class]["nb_review"] = 0
 		self.V[sent_class]["sentiment_class"] = sent_class
 		self.V[sent_class]["reviews"] = []
 
 
 		with open("./" + path, "r") as f:
-			cpt = 0
+			cpt = 1
 			for sReview in f:
+				self.V[sent_class]["nb_review"] += 1
+
 				dReview = {}
 				dReview["nb_word"] = 0
 				dReview["nb_sentence"] = 0
@@ -304,15 +330,18 @@ class Preprocessing(object):
 
 		self.V[sent_class] = {}
 		self.V[sent_class]["nb_word"] = 0
+		self.V[sent_class]["nb_review"] = 0
 		self.V[sent_class]["sentiment_class"] = sent_class
 		self.V[sent_class]["reviews"] = []
 
 		# get only .txt files and not .json files
 		files = [f for f in os.listdir(path) if re.match(r'.*\.txt', f)]
 
-		cpt = 0
+		cpt = -1
 		for filename in files:
 			rating = self.extract_rating(filename)
+			self.V[sent_class]["nb_review"] += 1
+
 			dReview = {}
 			dReview["nb_word"] = 0
 			dReview["nb_sentence"] = 0

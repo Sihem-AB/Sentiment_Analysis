@@ -22,6 +22,7 @@ selected_DB = Utils.DB_ONE
 # 1st use case: When necessary json files are not created yet
 #############################################################################################
 
+print("\n1st scenario\n\n")
 
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
@@ -40,7 +41,8 @@ prep.write_vocab()
 # 2nd use case: When necessary json files are already created
 #############################################################################################
 
-"""
+print("\n2nd scenario\n\n")
+
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
 prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
@@ -48,4 +50,4 @@ prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB)
 prep.read_vocab()
 V = prep.get_v()
 print(V)
-"""
+

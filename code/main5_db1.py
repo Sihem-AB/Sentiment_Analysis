@@ -24,6 +24,8 @@ is_bigrams = True
 #############################################################################################
 
 
+print("\n1st scenario\n\n")
+
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
 prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
@@ -31,7 +33,7 @@ prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
 prep.extract_vocabulary()
 # print extracted vocabularies in dictionnary (json) format
 V = prep.get_v()
-#print(V)
+print(V)
 
 # write the vocabs into 2 json files in order to save vocabs in a structured form
 prep.write_vocab()
@@ -41,7 +43,8 @@ prep.write_vocab()
 # 2nd use case: When necessary json files are already created
 #############################################################################################
 
-"""
+print("\n2nd scenario\n\n")
+
 # get a new instance for preprocessing
 # The new instance needs to know where positive and negative review directories are, also database no 
 prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
@@ -49,4 +52,3 @@ prep = Preprocessing.Preprocessing(pos_path, neg_path, selected_DB, is_bigrams)
 prep.read_vocab()
 V = prep.get_v()
 print(V)
-"""
