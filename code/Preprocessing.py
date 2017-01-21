@@ -293,7 +293,6 @@ class Preprocessing(object):
 		"""
 		cpt = 0
 		for sReview, rating in aReviews:
-			cpt += 1
 			self.V[sent_class]["nb_review"] += 1
 
 			dReview = {}
@@ -302,7 +301,8 @@ class Preprocessing(object):
 			dReview["rating"] = int(rating)
 			dReview["sentences"] = []
 			dReview["sentences_ordered"] = []  # Will contain every word of the sentence in order
-			dReview["id"] = cpt * sent_class
+			dReview["id"] = cpt + len(aReviews)* sent_class
+			cpt += 1
 		
 			sReview = self.clean_html(sReview)
 			sentences = self.divide_into_sentences(sReview)

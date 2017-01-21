@@ -122,7 +122,6 @@ class FeatureSelection(object):
 	def create_review_vector(self, nb_features, indexed_features_space, review, vector_type):
 		# create zeros vector
 		vec = np.zeros(nb_features)
-	
 		nb_word_in_review = review["nb_word"]
 		sentences = review["sentences"]
 		for sentence in sentences:
@@ -136,6 +135,7 @@ class FeatureSelection(object):
 						vec[index] = self.compute_tf_idf(term, freq, nb_word_in_review)
 					else: # BINARY
 						vec[index] = 1
+
 				except KeyError:
 					pass
 
@@ -372,11 +372,11 @@ class FeatureSelection(object):
 			for review in reviews:
 				X[review["id"], :] = model.docvecs[review["id"]]
 				Y[review["id"]] = sentiment_class
-		return X, Y
+		return model, X, Y
 
 
 	def create_doc2vec_tfidf_model(self, vocabs, reduced_vocabs, features_space, size=300, nb_epochs=10, learning_rate=0.025):
-		X_docvecs, Y = self.create_doc2vec_model(vocabs, size, nb_epochs, learning_rate)
+		model, X_docvecs, Y = self.create_doc2vec_model(vocabs, size, nb_epochs, learning_rate)
 		Xtfidf, Y = self.create_bag_of_words_model(reduced_vocabs, features_space, "TF-IDF")
 
-		return np.concatenate((X_docvecs, Xtfidf), axis=1), Y
+		return model, np.concatenate((X_docvecs, Xtfidf), axis=1), Y

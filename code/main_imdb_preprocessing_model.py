@@ -6,6 +6,10 @@ import TermFrequencyProcessing
 import FeatureSelection
 import pickle
 import FileToReview
+try:
+   import _pickle as pickle
+except:
+   import pickle
 
 """
 Input :
@@ -69,8 +73,8 @@ def do_preprocessing(pos_path, neg_path, selected_DB, is_bigrams, k=None, method
 """
 
 # --------------------------Parameters --------------------------------------------------------------------------------
-rep_train = "../sampledata/dataset2/train"
-rep_test = "../sampledata/dataset2/test"
+rep_train = "D:/Users/abdel/aclImdb/train"
+rep_test = "D:/Users/abdel/aclImdb/test"
 
 pos_path_train = rep_train + "/pos/"
 neg_path_train = rep_train + "/neg/"
@@ -78,6 +82,8 @@ neg_path_train = rep_train + "/neg/"
 pos_path_test = rep_test + "/pos/"
 neg_path_test = rep_test + "/neg/"
 
+# pos_path = "../sampledata/dataset2/pos/"
+# neg_path = "../sampledata/dataset2/neg/"
 
 selected_DB = Utils.DB_TWO
 
@@ -91,37 +97,61 @@ vector_type = "TF-IDF"
 #############################################################################################
 
 # MODEL FOR TRAINING_SET
-k = 0.2 # % pourcentage of word we keep by mutual information
+k = 0.1 # % pourcentage of word we keep by mutual information
 vocabs, reduced_vocabs, fs, features_space = do_preprocessing(pos_path_train, neg_path_train, selected_DB, is_bigrams, k, method)
 
-bag_of_words_model = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type)
-X_train_doc2vec, Y = fs.create_doc2vec_model(vocabs)
-X_train_doc2vec_tfidf, Y = fs.create_doc2vec_tfidf_model(vocabs, reduced_vocabs, features_space)
-X_train_tfidf = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type="TFIDF")
+pickle.dump(vocabs, open("../vocabs_train"+str(k)+".pickle", "wb"))
+pickle.dump(reduced_vocabs, open("../reduced_vocabs_train"+str(k)+".pickle", "wb"))
+pickle.dump(fs, open("../fs_train"+str(k)+".pickle", "wb"))
+pickle.dump(features_space, open("../featurespace"+str(k)+".pickle", "wb"))
+
+# vocabs = pickle.load(open("../vocabs_train"+str(k)+".pickle", "rb"))
+# reduced_vocabs = pickle.load(open("../reduced_vocabs_train"+str(k)+".pickle", "rb"))
+# fs = pickle.load(open("../fs_train"+str(k)+".pickle", "rb"))
+# features_space = pickle.load(open("../featurespace"+str(k)+".pickle", "rb"))
+
+print("debut tfidf train")
+X_train_tfidf, Y = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type=vector_type)
+# print("debut doc2vec train")
+# model_doc2tovec, X_train_doc2vec, Y = fs.create_doc2vec_model(vocabs, size=400)
+# print("debut doc2vectfidf train")
+# model_doc2tovec, X_train_doc2vec_tfidf, Y = fs.create_doc2vec_tfidf_model(vocabs, reduced_vocabs, features_space)
 
 # We save as a pickle
-pickle.dump(X_train_doc2vec, open("../X_train_doc2vec.pickle", "wb"))
-pickle.dump(X_train_doc2vec_tfidf, open("../X_train_doc2vec_tfidf"+str(k)+".pickle", "wb"))
+# pickle.dump(X_train_doc2vec, open("../X_train_doc2vec.pickle", "wb"))
+# pickle.dump(X_train_doc2vec_tfidf, open("../X_train_doc2vec_tfidf"+str(k)+".pickle", "wb"))
 pickle.dump(X_train_tfidf, open("../X_train_tfidf"+str(k)+".pickle", "wb"))
 pickle.dump(Y, open("../Y_train.pickle", "wb"))
-pickle.dump(features_space, open("../featurespace"+str(k)+".pickle", "wb"))
+
+
+
 
 
 # MODEL FOR TEST SET
+print ("début preprocessing test")
 vocabs, reduced_vocabs, fs = do_preprocessing(pos_path_test, neg_path_test, selected_DB, is_bigrams, features_space=features_space)
-# bag_of_words_model = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type)
-X_test_doc2vec, Y_test = fs.create_doc2vec_model(vocabs)
-X_test_doc2vec_tfidf, Y_test = fs.create_doc2vec_tfidf_model(vocabs,reduced_vocabs, features_space)
-X_test_tfidf = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type="TFIDF")
+
+pickle.dump(vocabs, open("../vocabs_test"+str(k)+".pickle", "wb"))
+pickle.dump(reduced_vocabs, open("../reduced_vocabs_test"+str(k)+".pickle", "wb"))
+pickle.dump(fs, open("../fs_test"+str(k)+".pickle", "wb"))
+pickle.dump(features_space, open("../featurespace"+str(k)+".pickle", "wb"))
+
+# vocabs = pickle.load(open("../vocabs_test"+str(k)+".pickle", "rb"))
+# reduced_vocabs = pickle.load(open("../reduced_vocabs_test"+str(k)+".pickle", "rb"))
+# fs = pickle.load(open("../fs_test"+str(k)+".pickle", "rb"))
+# features_space = pickle.load(open("../featurespace"+str(k)+".pickle", "rb"))
+
+
+# print("debut doc2vec test")
+# model_doc2tovec, X_test_doc2vec, Y_test = fs.create_doc2vec_model(vocabs, size=400)
+# print("debut doc2vectfidf test")
+# model_doc2tovec, X_test_doc2vec_tfidf, Y_test = fs.create_doc2vec_tfidf_model(vocabs,reduced_vocabs, features_space)
+print("debut tfidf test")
+X_test_tfidf, Y_test = fs.create_bag_of_words_model(reduced_vocabs, features_space, vector_type=vector_type)
 
 # We save as a pickle
-pickle.dump(X_test_doc2vec, open("../X_test_doc2vec.pickle", "wb"))
-pickle.dump(X_test_doc2vec_tfidf, open("../X_test_doc2vec_tfidf"+str(k)+".pickle", "wb"))
+# pickle.dump(X_test_doc2vec, open("../X_test_doc2vec.pickle", "wb"))
 pickle.dump(X_test_tfidf, open("../X_test_tfidf"+str(k)+".pickle", "wb"))
+# pickle.dump(X_test_doc2vec_tfidf, open("../X_test_doc2vec_tfidf"+str(k)+".pickle", "wb"))
 pickle.dump(Y_test, open("../Y_test.pickle", "wb"))
-
-
-
-
-# print(X.shape)
 
