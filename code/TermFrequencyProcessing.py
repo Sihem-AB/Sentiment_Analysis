@@ -188,7 +188,7 @@ class TermFrequencyProcessing(object):
 			nb_word = review["nb_word"]
 			review_id = review["id"]
 
-			review_terms = self.merge_terms_frequency_in_review(review)	
+			review_terms = self.merge_terms_frequency_in_review(review)
 
 			# update_overall_terms_frequency() updates self.T at each call
 			self.update_overall_terms_frequency(review_terms, review_id, sentiment_class)

@@ -52,7 +52,7 @@ class FileToReview(object):
 			# TODO raise an error
 			return 0
 
-		with open("./" + path, "r") as f:
+		with open(path, "r") as f:
 			for sReview in f:
 				row = [sReview, Utils.RATING_DEFAULT]
 				mReviews.append(row)
@@ -78,7 +78,7 @@ class FileToReview(object):
 	def buildReviewMatrixDB2(self, path):
 		mReviews = []
 
-		if not( Utils.is_directory(path) ):
+		if not( Utils.is_directory(path)):
 			print("error: path is not a directory")
 			# TODO raise an error
 			return 0

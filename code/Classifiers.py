@@ -1,3 +1,7 @@
+import numpy as np
+
+def precision(Y, Ypred):
+    return np.sum((Y==Ypred).astype(int)) / float(len(Y))
 
 def GradientBoosting_Classifier(self,max_depth,min_samples_leaf, n_estimators,learning_rate):
     from sklearn.ensemble import GradientBoostingClassifier
@@ -9,23 +13,23 @@ def RandomForest_Classifier(self,n_estimators):
     cls = RandomForestClassifier(n_estimators = n_estimators)
     return cls
 
-def SVC_Classifier(self):
+def SVC_Classifier():
     from sklearn.svm import SVC
     cls =  SVC(kernel='rbf', C=1.0, gamma='auto')
     return cls
 
-def MLP_Classifier(self):
+def MLP_Classifier():
     from sklearn.neural_network import MLPClassifier
     cls =MLPClassifier(hidden_layer_sizes=(100, ), activation='relu', batch_size='auto', learning_rate='constant', learning_rate_init=0.001, max_iter=200)
     return cls
 
-def fit(self,cls, X, y):
+def fit(self, X, y):
     self.cls.fit(X, y)
 
-def predict(self,cls, X):
+def predict(self, X):
     return self.cls.predict(X)
 
-def score(self,cls, X, Y):
+def score(self, X, Y):
     return self.cls.score(X,Y)
 
 def SVM_GridSearch(clf, C_range, gamma_range, crossVal, data, labels):
